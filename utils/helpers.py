@@ -4,6 +4,7 @@ import random
 from pathlib import Path
 from eth_account import Account
 from loguru import logger
+from typing import Iterable, Generator
 
 from settings import (
     DELAY_BETWEEN_ACCOUNTS,
@@ -46,10 +47,6 @@ def read_csv(file_name: str | Path, skip_header: bool = False):
     return data
 
 
-def is_corresponding_address(key, addr):
-    return True if Account.from_key(key).address.lower() == addr.lower() else False
-
-
 def sleeping(mode: int) -> None:
     sleep_time_config = {
         1: random.randint(DELAY_BETWEEN_ACTIONS[0], DELAY_BETWEEN_ACTIONS[1]),
@@ -72,3 +69,13 @@ def write_txt(new_filename: Path | str, data_list: list | tuple) -> bool | None:
         for item in data_list:
             file.write(item + "\n")
         return
+
+
+def change_proxy(current_proxy: str, proxy_cycle: Iterable | Generator) -> str:
+    proxy = None
+    logger.warning(f"Current proxy: {current_proxy}, changing...")
+    while proxy != current_proxy:
+        proxy = next(proxy_cycle)
+    new_proxy = next(proxy_cycle)
+    logger.success(f"Proxy changed to {new_proxy}")
+    return new_proxy

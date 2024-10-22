@@ -41,8 +41,9 @@ class RequestClient:
             f"Request is not successful, status code: {response.status_code}, text: {response.text}"
         )
 
-    def session_get(
+    def session_request(
         self,
+        method: str,
         url: str,
         headers: dict | None = None,
         data: dict | None = None,
@@ -50,7 +51,8 @@ class RequestClient:
         params: dict | None = None,
         timeout: int = 60,
     ):
-        with self._session.get(
+        with self._session.request(
+            method=method,
             url=url,
             headers={"User-Agent": self.user_agent} if headers is None else headers,
             data=data,
@@ -65,8 +67,9 @@ class RequestClient:
         ) as response:
             return self.handle_request(response)
 
-    def session_post(
+    def request(
         self,
+        method: str,
         url: str,
         headers: dict | None = None,
         data: dict | None = None,
@@ -74,32 +77,9 @@ class RequestClient:
         params: dict | None = None,
         timeout: int = 60,
     ):
-        with self._session.post(
+        response = requests.request(
             url=url,
-            headers={"User-Agent": self.user_agent} if headers is None else headers,
-            data=data,
-            params=params,
-            json=json,
-            proxies=(
-                {"http": self.proxy, "https": self.proxy}
-                if self.proxy is not None
-                else None
-            ),
-            timeout=timeout,
-        ) as response:
-            return self.handle_request(response)
-
-    def request_get(
-        self,
-        url: str,
-        headers: dict | None = None,
-        data: dict | None = None,
-        json: dict | None = None,
-        params: dict | None = None,
-        timeout: int = 60,
-    ):
-        response = requests.get(
-            url=url,
+            method=method,
             headers={"User-Agent": self.user_agent} if headers is None else headers,
             data=data,
             params=params,
@@ -114,33 +94,9 @@ class RequestClient:
 
         return self.handle_request(response)
 
-    def request_post(
+    def html_request(
         self,
-        url: str,
-        headers: dict | None = None,
-        data: dict | None = None,
-        json: dict | None = None,
-        params: dict | None = None,
-        timeout: int = 60,
-    ):
-        response = requests.post(
-            url=url,
-            headers={"User-Agent": self.user_agent} if headers is None else headers,
-            data=data,
-            params=params,
-            json=json,
-            proxies=(
-                {"http": self.proxy, "https": self.proxy}
-                if self.proxy is not None
-                else None
-            ),
-            timeout=timeout,
-        )
-
-        return self.handle_request(response)
-
-    def html_post(
-        self,
+        method: str,
         url: str,
         headers: dict | None = None,
         data: dict | None = None,
@@ -150,7 +106,8 @@ class RequestClient:
     ):
         session = HTMLSession()
 
-        response = session.post(
+        response = session.request(
+            method=method,
             url=url,
             headers={"User-Agent": self.user_agent} if headers is None else headers,
             data=data,

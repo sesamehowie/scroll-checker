@@ -2,6 +2,7 @@ import json
 from loguru import logger
 from eth_account import Account
 from eth_typing import HexStr
+from utils.decorators import retry
 from checker.request_client import RequestClient
 
 
@@ -21,6 +22,7 @@ class Checker(RequestClient):
         self.user_agent = user_agent
         self.proxy = proxy
 
+    @retry
     def check_allocation(self):
         logger.info(
             f"{self.account_name} | {self.address} | Checking $SCR allocation..."
@@ -46,12 +48,8 @@ class Checker(RequestClient):
             "user-agent": self.user_agent,
         }
 
-        res = self.html_post(url=url, json=payload, headers=headers)
+        res = self.html_request(method="POST", url=url, json=payload, headers=headers)
 
         data = json.loads(res.text.split("1:")[1].strip())
 
-        return [
-            self.account_name,
-            self.address,
-            round(float(data["amount"]) / 10**18, 4),
-        ]
+        return data
